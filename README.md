@@ -1,3 +1,4 @@
+[![Build Status](https://dev.azure.com/blackpearl123/Space%20Game%20-%20web%20-%20Pipeline/_apis/build/status%2FAbhilash3456.demo?branchName=main)](https://dev.azure.com/blackpearl123/Space%20Game%20-%20web%20-%20Pipeline/_build/latest?definitionId=14&branchName=main)
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
