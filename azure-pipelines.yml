@@ -26,9 +26,9 @@ steps:
     artifact: 'react-app'
     publishLocation: 'pipeline'
 
-# - script: |
-#     az login --service-principal -u $(servicePrincipalId) -p $(servicePrincipalKey) --tenant $(tenantId)
-#     az storage blob delete-batch --source "\$web" --pattern "*" --account-name "$(storageAccountName)" --account-key "$(storageAccountKey)"
-#     az storage blob upload-batch --destination "\$web" --source "$(System.DefaultWorkingDirectory)/$(artifactPath)/build" --account-name "$(storageAccountName)" --account-key "$(storageAccountKey)"
-#     az logout
-#   displayName: 'Upload Artifacts to Azure Storage'
+- script: |
+    az login --service-principal -u $(servicePrincipalId) -p $(servicePrincipalKey) --tenant $(tenantId)
+    az storage blob delete-batch --source "\$web" --pattern "*" --account-name "$(storageAccountName)" --account-key "$(storageAccountKey)"
+    az storage blob upload-batch --destination "\$web" --source "$(System.DefaultWorkingDirectory)/$(artifactPath)/build" --account-name "$(storageAccountName)" --account-key "$(storageAccountKey)"
+    az logout
+  displayName: 'Upload Artifacts to Azure Storage'
