@@ -20,11 +20,11 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
-# - task: PublishPipelineArtifact@1
-#   inputs:
-#     targetPath: '$(System.DefaultWorkingDirectory)/build'
-#     artifact: 'react-app'
-#     publishLocation: 'pipeline'
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)/build'
+    artifact: 'react-app'
+    publishLocation: 'pipeline'
 
 # - script: |
 #     az login --service-principal -u $(servicePrincipalId) -p $(servicePrincipalKey) --tenant $(tenantId)
