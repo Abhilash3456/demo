@@ -125,6 +125,7 @@ steps:
 #       # Cleanup temporary files
 #       rm $AZURE_CLI_TEMP_OUTPUT
 
+
 - task: AzureCLI@2
   displayName: 'Copy log files to storage account'
   inputs:
@@ -137,11 +138,11 @@ steps:
       resourceGroupName='tailspin-space-game-rg'
       storageAccountName='sampleappservice123'
       containerName='demo'
-      sourcePath='/home/LogFiles'
+      sourcePath='/home/LogFiles/sample.log'  # Specify the exact log file path
       storageAccountKey='ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ=='  # Replace with your storage account key
       
       # Copy log files to storage account
-      az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath/* $AZURE_CLI_TEMP_OUTPUT
+      az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath $AZURE_CLI_TEMP_OUTPUT
       
       # Upload log files to storage account container
       logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'LogFiles.*')
