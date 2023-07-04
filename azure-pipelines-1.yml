@@ -19,3 +19,77 @@ steps:
     npm install
     npm run build
   displayName: 'npm install and build'
+
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)/build'
+    artifact: 'react-app123'
+    publishLocation: 'pipeline'
+    
+# - task: AzurePowerShell@5
+#   displayName: 'Download files from App Service'
+#   inputs:
+#     azureSubscription: 'rm-sc-as'
+#     scriptType: 'InlineScript'
+#     azurePowerShellVersion: 'LatestVersion'
+#     inline: |
+#       $appName = 'tailspin-space-game-web-dev1'
+#       $resourceGroupName = 'tailspin-space-game-rg'
+#       $tempPath = '$(Build.ArtifactStagingDirectory)/temp'
+#       $targetPath = '$(Build.ArtifactStagingDirectory)/app_files'
+
+#       # Create temporary and target directories
+#       New-Item -ItemType Directory -Path $tempPath -Force | Out-Null
+#       New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+
+#       # Download files using Kudu API
+#       $apiUrl = "https://$appName.scm.azurewebsites.net/api/zip/site/wwwroot/"
+#       $zipFilePath = "$tempPath/app_files.zip"
+#       Invoke-RestMethod -Uri $apiUrl -Headers @{Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"} -OutFile $zipFilePath
+
+#       # Extract the downloaded zip file
+#       Expand-Archive -Path $zipFilePath -DestinationPath $targetPath -Force
+
+
+
+# - task: AzureCLI@2
+#   displayName: 'Upload files to storage account'
+#   inputs:
+#     azureSubscription: 'rm-sc-as'
+#     scriptType: 'bash'
+#     scriptLocation: 'inlineScript'
+#     inlineScript: |
+#       az storage blob upload-batch --account-name sampleappservice123 --destination demo --source $(Build.ArtifactStagingDirectory)/app_files --pattern "*"
+
+- task: AzurePowerShell@5
+  displayName: 'Copy log files to storage account'
+  inputs:
+    azureSubscription: 'rm-sc-as'
+    scriptType: 'InlineScript'
+    azurePowerShellVersion: 'LatestVersion'
+    inline: |
+      $appName = 'tailspin-space-game-web-dev1'
+      $resourceGroupName = 'tailspin-space-game-rg'
+      $storageAccountName = 'sampleappservice123'
+      $containerName = 'demo'
+      
+      # Authenticate with Azure
+      Connect-AzAccount -ServicePrincipal -TenantId $(servicePrincipalTenantId) -ApplicationId $(servicePrincipalId) -CertificateThumbprint $(servicePrincipalCertificateThumbprint)
+      
+      # Get the storage account key
+      $storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupName -Name $storageAccountName).Value[0]
+      
+      # Set the storage context
+      $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
+      
+      # Get the log files from App Service
+      $sourcePath = '/home/LogFiles'
+      $destinationPath = '$logs'
+      Get-AzWebAppContainerLoggingFile -ResourceGroupName $resourceGroupName -Name $appName -Path $sourcePath -Destination $destinationPath
+      
+      # Upload log files to storage account container
+      $logs = Get-ChildItem -Path $destinationPath -Filter '*.log' -File
+      foreach ($log in $logs) {
+          Set-AzStorageBlobContent -Context $storageContext -Container $containerName -File $log.FullName -Blob $log.Name -Force
+      }
