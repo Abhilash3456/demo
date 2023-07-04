@@ -61,35 +61,61 @@ steps:
 #     scriptLocation: 'inlineScript'
 #     inlineScript: |
 #       az storage blob upload-batch --account-name sampleappservice123 --destination demo --source $(Build.ArtifactStagingDirectory)/app_files --pattern "*"
-
-- task: AzurePowerShell@5
+######################
+# - task: AzurePowerShell@5
+#   displayName: 'Copy log files to storage account'
+#   inputs:
+#     azureSubscription: 'rm-sc-as'
+#     scriptType: 'InlineScript'
+#     azurePowerShellVersion: 'LatestVersion'
+#     inline: |
+#       $appName = 'tailspin-space-game-web-dev1'
+#       $resourceGroupName = 'tailspin-space-game-rg'
+#       $storageAccountName = 'sampleappservice123'
+#       $containerName = 'demo'
+      
+#       # Authenticate with Azure
+#       Connect-AzAccount -ServicePrincipal -TenantId $(servicePrincipalTenantId) -ApplicationId $(servicePrincipalId) -CertificateThumbprint $(servicePrincipalCertificateThumbprint)
+      
+#       # Get the storage account key
+#       $storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupName -Name $storageAccountName).Value[0]
+      
+#       # Set the storage context
+#       $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
+      
+#       # Get the log files from App Service
+#       $sourcePath = '/home/LogFiles'
+#       $destinationPath = '$logs'
+#       Get-AzWebAppContainerLoggingFile -ResourceGroupName $resourceGroupName -Name $appName -Path $sourcePath -Destination $destinationPath
+      
+#       # Upload log files to storage account container
+#       $logs = Get-ChildItem -Path $destinationPath -Filter '*.log' -File
+#       foreach ($log in $logs) {
+#           Set-AzStorageBlobContent -Context $storageContext -Container $containerName -File $log.FullName -Blob $log.Name -Force
+#       }
+- task: AzureCLI@2
   displayName: 'Copy log files to storage account'
   inputs:
     azureSubscription: 'rm-sc-as'
-    scriptType: 'InlineScript'
-    azurePowerShellVersion: 'LatestVersion'
-    inline: |
-      $appName = 'tailspin-space-game-web-dev1'
-      $resourceGroupName = 'tailspin-space-game-rg'
-      $storageAccountName = 'sampleappservice123'
-      $containerName = 'demo'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # Set variables
+      appServiceName='tailspin-space-game-web-dev1'
+      resourceGroupName='tailspin-space-game-rg'
+      storageAccountName='sampleappservice123'
+      containerName='demo'
+      sourcePath='/home/LogFiles'
       
-      # Authenticate with Azure
-      Connect-AzAccount -ServicePrincipal -TenantId $(servicePrincipalTenantId) -ApplicationId $(servicePrincipalId) -CertificateThumbprint $(servicePrincipalCertificateThumbprint)
+      # Get storage account key
+      storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" -o tsv)
       
-      # Get the storage account key
-      $storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupName -Name $storageAccountName).Value[0]
-      
-      # Set the storage context
-      $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
-      
-      # Get the log files from App Service
-      $sourcePath = '/home/LogFiles'
-      $destinationPath = '$logs'
-      Get-AzWebAppContainerLoggingFile -ResourceGroupName $resourceGroupName -Name $appName -Path $sourcePath -Destination $destinationPath
+      # Copy log files to storage account
+      az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath/* --output $AZURE_CLI_TEMP_OUTPUT
       
       # Upload log files to storage account container
-      $logs = Get-ChildItem -Path $destinationPath -Filter '*.log' -File
-      foreach ($log in $logs) {
-          Set-AzStorageBlobContent -Context $storageContext -Container $containerName -File $log.FullName -Blob $log.Name -Force
-      }
+      logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'logs.*')
+      az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
+      
+      # Cleanup temporary files
+      rm $AZURE_CLI_TEMP_OUTPUT
