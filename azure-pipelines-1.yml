@@ -123,6 +123,32 @@ steps:
 #       az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
       
 #       # Cleanup temporary files
+# #       rm $AZURE_CLI_TEMP_OUTPUT
+# - task: AzureCLI@2
+#   displayName: 'Copy log files to storage account'
+#   inputs:
+#     azureSubscription: 'rm-sc-as'
+#     scriptType: 'bash'
+#     scriptLocation: 'inlineScript'
+#     inlineScript: |
+#       # Set variables
+#       appServiceName='tailspin-space-game-web-dev1'
+#       resourceGroupName='tailspin-space-game-rg'
+#       storageAccountName='sampleappservice123'
+#       containerName='demo'
+#       sourcePath='/home/LogFiles'
+      
+#       # Get storage account key
+#       storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" -o tsv)
+      
+#       # Copy log files to storage account
+#       az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath/*
+      
+#       # Upload log files to storage account container
+#       logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'logs.*')
+#       az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
+      
+#       # Cleanup temporary files
 #       rm $AZURE_CLI_TEMP_OUTPUT
 - task: AzureCLI@2
   displayName: 'Copy log files to storage account'
@@ -141,12 +167,9 @@ steps:
       # Get storage account key
       storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" -o tsv)
       
-      # Copy log files to storage account
-      az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath/*
-      
-      # Upload log files to storage account container
-      logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'logs.*')
-      az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
-      
-      # Cleanup temporary files
-      rm $AZURE_CLI_TEMP_OUTPUT
+      # Download and upload log files individually
+      for file in $(az webapp log list-files --name $appServiceName --resource-group $resourceGroupName --output tsv --query "[].name"); do
+        az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file "$sourcePath/$file"
+        az storage blob upload --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --type block --source "$AZURE_CLI_TEMP_OUTPUT" --name "$file"
+        rm $AZURE_CLI_TEMP_OUTPUT
+      done
