@@ -113,7 +113,7 @@ steps:
       sourcePath='/home/LogFiles'
       
       # Get storage account key
-      storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" -o tsv)
+      storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" --output tsv)
       
       # Copy log files to storage account
       az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath/* --output $AZURE_CLI_TEMP_OUTPUT
