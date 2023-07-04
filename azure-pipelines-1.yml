@@ -150,7 +150,7 @@ steps:
       
 #       # Cleanup temporary files
 # #       rm $AZURE_CLI_TEMP_OUTPUT- task: AzureCLI@2
-  displayName: 'Copy log files to storage account'
+  displayName: 'Copy log files to storage account123'
   inputs:
     azureSubscription: 'rm-sc-as'
     scriptType: 'bash'
