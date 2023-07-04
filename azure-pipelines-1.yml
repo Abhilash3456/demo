@@ -10,6 +10,11 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+- script: |
+    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    sudo apt-get update
+    sudo apt-get install jq -y
+  displayName: 'Install Azure CLI and jq'
 # - task: NodeTool@0
 #   inputs:
 #     versionSpec: '10.x'
