@@ -97,7 +97,7 @@ steps:
 #       $logs = Get-ChildItem -Path $destinationPath -Filter '*.log' -File
 #       foreach ($log in $logs) {
 #           Set-AzStorageBlobContent -Context $storageContext -Container $containerName -File $log.FullName -Blob $log.Name -Force
-# #       }
+# # #       }
 - task: AzureCLI@2
   displayName: 'Copy log files to storage account'
   inputs:
@@ -115,12 +115,12 @@ steps:
       # Get storage account key
       storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" -o tsv)
       
-      # Download and upload log files
-      dryRunOutput=$(az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath/* --dryrun)
-      logFiles=$(echo "$dryRunOutput" | grep -oP '\[.*?\]' | tr -d '[]' | tr -d ' ' | tr ',' '\n')
+      # Copy log files to storage account
+      az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath/* --output $AZURE_CLI_TEMP_OUTPUT
       
-      for file in $logFiles; do
-        az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file "$sourcePath/$file"
-        az storage blob upload --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --type block --source "$AZURE_CLI_TEMP_OUTPUT" --name "$file"
-        rm $AZURE_CLI_TEMP_OUTPUT
-      done
+      # Upload log files to storage account container
+      logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'LogFiles.*')
+      az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
+      
+      # Cleanup temporary files
+      rm $AZURE_CLI_TEMP_OUTPUT
