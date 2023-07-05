@@ -30,6 +30,9 @@ steps:
     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
     sudo apt-get update
     sudo apt-get install jq -y
+    mkdir tempe
+    ls
+    pwd
   displayName: 'Install Azure CLI and jq'
 
 - task: AzureCLI@2
