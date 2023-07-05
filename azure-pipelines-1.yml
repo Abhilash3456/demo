@@ -2,7 +2,6 @@
 # Build a Node.js project that uses React.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
   - main
 
@@ -27,74 +26,6 @@ steps:
         echo "Copying .log files to storage account container..."
         az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
 
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
-
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
-
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/build'
-    artifact: 'react-app'
-    publishLocation: 'pipeline'
-
-- script: |
-    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-    sudo apt-get update
-    sudo apt-get install jq -y
-    mkdir tempe
-    ls
-    pwd
-  displayName: 'Install Azure CLI and jq'
-
-- task: AzureCLI@2
-  displayName: 'Copy log files to storage account'
-  inputs:
-    azureSubscription: 'rm-sc-as'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      # Set variables
-      appServiceName='tailspin-space-game-web-dev1'
-      resourceGroupName='tailspin-space-game-rg'
-      storageAccountName='sampleappservice123'
-      containerName='demo'
-      sourcePath='/home/LogFiles/*.log'
-      
-      # Get storage account key
-      storageAccountKey='ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ=='
-      
-      # Copy log files to storage account
-      az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath --output /home/vsts/work/1/s/tempe
-      
-      # Upload log files to storage account container
-      logsDir=$(cat /home/vsts/work/1/s/tempe | jq -r '.[].path' | grep -oP 'logs.*')
-      az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
-      
-      # Cleanup temporary files
-      rm $AZURE_CLI_TEMP_OUTPUT
-
-
-
-- task: AzureCLI@2
-  displayName: 'Copy log files to Azure Storage'
-  inputs:
-    azureSubscription: 'rm-sc-as'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az storage blob upload-batch --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ== --destination-container demo --source "/home/LogFiles/*.log"
-
-# - script: |
-#     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-#     sudo apt-get update
-#     sudo apt-get install jq -y
-#   displayName: 'Install Azure CLI and jq'
 # - task: NodeTool@0
 #   inputs:
 #     versionSpec: '10.x'
@@ -105,79 +36,21 @@ steps:
 #     npm run build
 #   displayName: 'npm install and build'
 
-
 # - task: PublishPipelineArtifact@1
 #   inputs:
 #     targetPath: '$(System.DefaultWorkingDirectory)/build'
-#     artifact: 'react-app123'
+#     artifact: 'react-app'
 #     publishLocation: 'pipeline'
-    
-# - task: AzurePowerShell@5
-#   displayName: 'Download files from App Service'
-#   inputs:
-#     azureSubscription: 'rm-sc-as'
-#     scriptType: 'InlineScript'
-#     azurePowerShellVersion: 'LatestVersion'
-#     inline: |
-#       $appName = 'tailspin-space-game-web-dev1'
-#       $resourceGroupName = 'tailspin-space-game-rg'
-#       $tempPath = '$(Build.ArtifactStagingDirectory)/temp'
-#       $targetPath = '$(Build.ArtifactStagingDirectory)/app_files'
 
-#       # Create temporary and target directories
-#       New-Item -ItemType Directory -Path $tempPath -Force | Out-Null
-#       New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+# - script: |
+#     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+#     sudo apt-get update
+#     sudo apt-get install jq -y
+#     mkdir tempe
+#     ls
+#     pwd
+#   displayName: 'Install Azure CLI and jq'
 
-#       # Download files using Kudu API
-#       $apiUrl = "https://$appName.scm.azurewebsites.net/api/zip/site/wwwroot/"
-#       $zipFilePath = "$tempPath/app_files.zip"
-#       Invoke-RestMethod -Uri $apiUrl -Headers @{Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"} -OutFile $zipFilePath
-
-#       # Extract the downloaded zip file
-#       Expand-Archive -Path $zipFilePath -DestinationPath $targetPath -Force
-
-
-
-# - task: AzureCLI@2
-#   displayName: 'Upload files to storage account'
-#   inputs:
-#     azureSubscription: 'rm-sc-as'
-#     scriptType: 'bash'
-#     scriptLocation: 'inlineScript'
-#     inlineScript: |
-#       az storage blob upload-batch --account-name sampleappservice123 --destination demo --source $(Build.ArtifactStagingDirectory)/app_files --pattern "*"
-######################
-# - task: AzurePowerShell@5
-#   displayName: 'Copy log files to storage account'
-#   inputs:
-#     azureSubscription: 'rm-sc-as'
-#     scriptType: 'InlineScript'
-#     azurePowerShellVersion: 'LatestVersion'
-#     inline: |
-#       $appName = 'tailspin-space-game-web-dev1'
-#       $resourceGroupName = 'tailspin-space-game-rg'
-#       $storageAccountName = 'sampleappservice123'
-#       $containerName = 'demo'
-      
-#       # Authenticate with Azure
-#       Connect-AzAccount -ServicePrincipal -TenantId $(servicePrincipalTenantId) -ApplicationId $(servicePrincipalId) -CertificateThumbprint $(servicePrincipalCertificateThumbprint)
-      
-#       # Get the storage account key
-#       $storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupName -Name $storageAccountName).Value[0]
-      
-#       # Set the storage context
-#       $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
-      
-#       # Get the log files from App Service
-#       $sourcePath = '/home/LogFiles'
-#       $destinationPath = '$logs'
-#       Get-AzWebAppContainerLoggingFile -ResourceGroupName $resourceGroupName -Name $appName -Path $sourcePath -Destination $destinationPath
-      
-#       # Upload log files to storage account container
-#       $logs = Get-ChildItem -Path $destinationPath -Filter '*.log' -File
-#       foreach ($log in $logs) {
-#           Set-AzStorageBlobContent -Context $storageContext -Container $containerName -File $log.FullName -Blob $log.Name -Force
-# # # #       }
 # - task: AzureCLI@2
 #   displayName: 'Copy log files to storage account'
 #   inputs:
@@ -190,43 +63,169 @@ steps:
 #       resourceGroupName='tailspin-space-game-rg'
 #       storageAccountName='sampleappservice123'
 #       containerName='demo'
-#       sourcePath='/home/LogFiles'
+#       sourcePath='/home/LogFiles/*.log'
       
 #       # Get storage account key
-#       storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" --output tsv)
+#       storageAccountKey='ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ=='
       
 #       # Copy log files to storage account
-#       az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath/* --output $AZURE_CLI_TEMP_OUTPUT
+#       az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath --output /home/vsts/work/1/s/tempe
       
 #       # Upload log files to storage account container
-#       logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'LogFiles.*')
+#       logsDir=$(cat /home/vsts/work/1/s/tempe | jq -r '.[].path' | grep -oP 'logs.*')
 #       az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
       
 #       # Cleanup temporary files
 #       rm $AZURE_CLI_TEMP_OUTPUT
 
 
+
 # - task: AzureCLI@2
-#   displayName: 'Copy log files to storage account'
+#   displayName: 'Copy log files to Azure Storage'
 #   inputs:
 #     azureSubscription: 'rm-sc-as'
 #     scriptType: 'bash'
 #     scriptLocation: 'inlineScript'
 #     inlineScript: |
-#       # Set variables
-#       appServiceName='tailspin-space-game-web-dev1'
-#       resourceGroupName='tailspin-space-game-rg'
-#       storageAccountName='sampleappservice123'
-#       containerName='demo'
-#       sourcePath='/home/LogFiles/sample.log'  # Specify the exact log file path
-#       storageAccountKey='ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ=='  # Replace with your storage account key
+#       az storage blob upload-batch --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ== --destination-container demo --source "/home/LogFiles/*.log"
+
+# # - script: |
+# #     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+# #     sudo apt-get update
+# #     sudo apt-get install jq -y
+# #   displayName: 'Install Azure CLI and jq'
+# # - task: NodeTool@0
+# #   inputs:
+# #     versionSpec: '10.x'
+# #   displayName: 'Install Node.js'
+
+# # - script: |
+# #     npm install
+# #     npm run build
+# #   displayName: 'npm install and build'
+
+
+# # - task: PublishPipelineArtifact@1
+# #   inputs:
+# #     targetPath: '$(System.DefaultWorkingDirectory)/build'
+# #     artifact: 'react-app123'
+# #     publishLocation: 'pipeline'
+    
+# # - task: AzurePowerShell@5
+# #   displayName: 'Download files from App Service'
+# #   inputs:
+# #     azureSubscription: 'rm-sc-as'
+# #     scriptType: 'InlineScript'
+# #     azurePowerShellVersion: 'LatestVersion'
+# #     inline: |
+# #       $appName = 'tailspin-space-game-web-dev1'
+# #       $resourceGroupName = 'tailspin-space-game-rg'
+# #       $tempPath = '$(Build.ArtifactStagingDirectory)/temp'
+# #       $targetPath = '$(Build.ArtifactStagingDirectory)/app_files'
+
+# #       # Create temporary and target directories
+# #       New-Item -ItemType Directory -Path $tempPath -Force | Out-Null
+# #       New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+
+# #       # Download files using Kudu API
+# #       $apiUrl = "https://$appName.scm.azurewebsites.net/api/zip/site/wwwroot/"
+# #       $zipFilePath = "$tempPath/app_files.zip"
+# #       Invoke-RestMethod -Uri $apiUrl -Headers @{Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"} -OutFile $zipFilePath
+
+# #       # Extract the downloaded zip file
+# #       Expand-Archive -Path $zipFilePath -DestinationPath $targetPath -Force
+
+
+
+# # - task: AzureCLI@2
+# #   displayName: 'Upload files to storage account'
+# #   inputs:
+# #     azureSubscription: 'rm-sc-as'
+# #     scriptType: 'bash'
+# #     scriptLocation: 'inlineScript'
+# #     inlineScript: |
+# #       az storage blob upload-batch --account-name sampleappservice123 --destination demo --source $(Build.ArtifactStagingDirectory)/app_files --pattern "*"
+# ######################
+# # - task: AzurePowerShell@5
+# #   displayName: 'Copy log files to storage account'
+# #   inputs:
+# #     azureSubscription: 'rm-sc-as'
+# #     scriptType: 'InlineScript'
+# #     azurePowerShellVersion: 'LatestVersion'
+# #     inline: |
+# #       $appName = 'tailspin-space-game-web-dev1'
+# #       $resourceGroupName = 'tailspin-space-game-rg'
+# #       $storageAccountName = 'sampleappservice123'
+# #       $containerName = 'demo'
       
-#       # Copy log files to storage account
-#       az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath $AZURE_CLI_TEMP_OUTPUT
+# #       # Authenticate with Azure
+# #       Connect-AzAccount -ServicePrincipal -TenantId $(servicePrincipalTenantId) -ApplicationId $(servicePrincipalId) -CertificateThumbprint $(servicePrincipalCertificateThumbprint)
       
-#       # Upload log files to storage account container
-#       logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'LogFiles.*')
-#       az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
+# #       # Get the storage account key
+# #       $storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupName -Name $storageAccountName).Value[0]
       
-#       # Cleanup temporary files
-#       rm $AZURE_CLI_TEMP_OUTPUT
+# #       # Set the storage context
+# #       $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
+      
+# #       # Get the log files from App Service
+# #       $sourcePath = '/home/LogFiles'
+# #       $destinationPath = '$logs'
+# #       Get-AzWebAppContainerLoggingFile -ResourceGroupName $resourceGroupName -Name $appName -Path $sourcePath -Destination $destinationPath
+      
+# #       # Upload log files to storage account container
+# #       $logs = Get-ChildItem -Path $destinationPath -Filter '*.log' -File
+# #       foreach ($log in $logs) {
+# #           Set-AzStorageBlobContent -Context $storageContext -Container $containerName -File $log.FullName -Blob $log.Name -Force
+# # # # #       }
+# # - task: AzureCLI@2
+# #   displayName: 'Copy log files to storage account'
+# #   inputs:
+# #     azureSubscription: 'rm-sc-as'
+# #     scriptType: 'bash'
+# #     scriptLocation: 'inlineScript'
+# #     inlineScript: |
+# #       # Set variables
+# #       appServiceName='tailspin-space-game-web-dev1'
+# #       resourceGroupName='tailspin-space-game-rg'
+# #       storageAccountName='sampleappservice123'
+# #       containerName='demo'
+# #       sourcePath='/home/LogFiles'
+      
+# #       # Get storage account key
+# #       storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" --output tsv)
+      
+# #       # Copy log files to storage account
+# #       az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath/* --output $AZURE_CLI_TEMP_OUTPUT
+      
+# #       # Upload log files to storage account container
+# #       logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'LogFiles.*')
+# #       az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
+      
+# #       # Cleanup temporary files
+# #       rm $AZURE_CLI_TEMP_OUTPUT
+
+
+# # - task: AzureCLI@2
+# #   displayName: 'Copy log files to storage account'
+# #   inputs:
+# #     azureSubscription: 'rm-sc-as'
+# #     scriptType: 'bash'
+# #     scriptLocation: 'inlineScript'
+# #     inlineScript: |
+# #       # Set variables
+# #       appServiceName='tailspin-space-game-web-dev1'
+# #       resourceGroupName='tailspin-space-game-rg'
+# #       storageAccountName='sampleappservice123'
+# #       containerName='demo'
+# #       sourcePath='/home/LogFiles/sample.log'  # Specify the exact log file path
+# #       storageAccountKey='ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ=='  # Replace with your storage account key
+      
+# #       # Copy log files to storage account
+# #       az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath $AZURE_CLI_TEMP_OUTPUT
+      
+# #       # Upload log files to storage account container
+# #       logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'LogFiles.*')
+# #       az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
+      
+# #       # Cleanup temporary files
+# #       rm $AZURE_CLI_TEMP_OUTPUT
