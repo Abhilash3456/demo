@@ -37,7 +37,7 @@ steps:
       pwd
       ls
       echo $(Agent.TempDirectory)
-      rm $(Agent.TempDirectory)/logfiles
+      rm -rf $(Agent.TempDirectory)/logfiles
       ls $(Agent.TempDirectory)
 - script: |
     ls
