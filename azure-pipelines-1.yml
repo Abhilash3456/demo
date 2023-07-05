@@ -10,25 +10,34 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-  - task: AzureCLI@2
-    inputs:
-      azureSubscription: 'rm-sc-as'
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        # Create a temporary directory
-        mkdir -p "$(Agent.TempDirectory)/logfiles"
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'rm-sc-as'
+    appType: 'webAppLinux'
+    WebAppName: 'tailspin-space-game-web-dev1'
+    packageForLinux: '**/*.log'
+    ExcludeFilesFromAppDataFlag: true
 
-        # Install Azure Storage Explorer
-        curl -sL https://aka.ms/InstallAzureStorageExplorerLinux | sudo bash
+  # - task: AzureCLI@2
+  #   inputs:
+  #     azureSubscription: 'rm-sc-as'
+  #     scriptType: 'bash'
+  #     scriptLocation: 'inlineScript'
+  #     inlineScript: |
+  #       # Create a temporary directory
+  #       mkdir -p "$(Agent.TempDirectory)/logfiles"
 
-        # Copy the .log files from the App Service to the temporary directory
-        echo "Copying .log files from App Service to temporary directory..."
-        az storage copy --source-container-name logs --source-path "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" --destination "$(Agent.TempDirectory)/logfiles" --destination-container demo --recursive
+  #       # Install Azure Storage Explorer
+  #       curl -sL https://aka.ms/InstallAzureStorageExplorerLinux | sudo bash
 
-        # Copy the .log files to the storage account container
-        echo "Copying .log files to storage account container..."
-        az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo/logfiles --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
+  #       # Copy the .log files from the App Service to the temporary directory
+  #       echo "Copying .log files from App Service to temporary directory..."
+  #       az storage copy --source-container-name logs --source-path "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" --destination "$(Agent.TempDirectory)/logfiles" --destination-container demo --recursive
+
+  #       # Copy the .log files to the storage account container
+  #       echo "Copying .log files to storage account container..."
+  #       az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo/logfiles --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
 
 
 
