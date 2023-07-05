@@ -10,17 +10,33 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+
+- script: |
+    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    sudo apt-get update
+    sudo apt-get install jq -y
+    mkdir tempe
+    ls
+    pwd
+  displayName: 'Install Azure CLI and jq'
+
 - task: AzureCLI@2
+  displayName: 'Copy file to Azure Storage Account'
   inputs:
     azureSubscription: 'rm-sc-as'
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      # Retrieve the storage connection string from the App Service application settings
-      connection=$(az webapp config appsettings list --name tailspin-space-game-web-dev1 --resource-group tailspin-space-game-rg --query "[?name=='AzureWebJobsStorage'].value" --output tsv)
+      # Get the file from App Service using Kudu REST API
+      fileUrl=$(az webapp kudu file list -g tailspin-space-game-rg -n tailspin-space-game-web-dev1 --path "/home/LogFiles/sample.log" --json | jq -r '.[].href')
+      curl -o sample.log $fileUrl
       
-      # Copy the file from storage account to Azure DevOps pipeline
-      az storage blob download-batch --connection-string "$connection" --destination $(Build.ArtifactStagingDirectory) --source '/home/LogFiles/sample.log'
+      # Copy the file to Azure Storage Account
+      az storage blob upload --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ== --container-name demo --name sampleans.log --type block --source sample.log
+      
+      # Clean up the downloaded file
+      rm sample.log
+
 
   # - task: AzureCLI@2
   #   inputs:
