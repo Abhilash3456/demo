@@ -17,6 +17,7 @@ steps:
     scriptLocation: 'inlineScript'
     inlineScript: |
       # Create a temporary directory
+      mkdir -p "$(Agent.TempDirectory)"
       mkdir -p "$(Agent.TempDirectory)/logfiles"
       
       # Retrieve the .log files from the App Service using Kudu REST API
@@ -26,7 +27,6 @@ steps:
       # Copy the .log files to the storage account container
       echo "Copying .log files to storage account container..."
       find "$(Agent.TempDirectory)/logfiles" -name "*.log" -type f -exec az storage blob upload --type block --source {} --destination demo --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ== \;
-
 
 
 
