@@ -21,7 +21,7 @@ steps:
         
         # Retrieve the .log files from the App Service using Kudu REST API
         echo "Retrieving .log files from App Service..."
-        log_urls=$(curl -u $USERNAME:$PASSWORD "https://<app_service_name>.scm.azurewebsites.net/api/vfs/home/LogFiles/*.log" -s)
+        log_urls=$(curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/home/LogFiles/*.log" -s)
         echo "Log URLs: $log_urls"
         
         while IFS= read -r log_url; do
