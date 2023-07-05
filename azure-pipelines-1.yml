@@ -2,6 +2,8 @@
 # Build a Node.js project that uses React.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+
 trigger:
   - main
 
@@ -20,11 +22,11 @@ steps:
       
       # Retrieve the .log files from the App Service using Kudu REST API
       echo "Retrieving .log files from App Service..."
-      curl -u $USERNAME:$PASSWORD https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/2023_07_05_lw1sdlwk000EPX_docker.log -o "$(Agent.TempDirectory)/logfiles/2023_07_05_lw1sdlwk000EPX_docker.log.log"
+      curl -u $USERNAME:$PASSWORD https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/2023_07_05_lw1sdlwk000EPX_docker.log -o "$(Agent.TempDirectory)/logfiles/2023_07_05_lw1sdlwk000EPX_docker.log"
       
       # Copy the .log files to the storage account container
       echo "Copying .log files to storage account container..."
-      find "$TEMP_DIR/logfiles" -name "2023_07_05_lw1sdlwk000EPX_docker.log" -type f -exec az storage blob upload --type block --source {} --destination demo --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ== \;
+      az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
 
 
 
