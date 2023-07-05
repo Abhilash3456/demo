@@ -18,6 +18,7 @@ steps:
     inlineScript: |
       # Create a temporary directory
       mkdir -p "$(Agent.TempDirectory)/logfiles"
+      echo $(Agent.TempDirectory)
       ls
       pwd
       # Retrieve the list of .log files from the App Service using Kudu REST API
@@ -35,7 +36,8 @@ steps:
       az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination "demo/logfiles/$(date +"%d_%m_%Y_[%I:%M %p]")" --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
       pwd
       ls
-      
+      echo $(Agent.TempDirectory)
+      ls $(Agent.TempDirectory)/logfiles
 - script: |
     ls
     pwd
