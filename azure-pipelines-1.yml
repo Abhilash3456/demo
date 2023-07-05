@@ -38,6 +38,7 @@ steps:
       ls
       echo $(Agent.TempDirectory)
       ls $(Agent.TempDirectory)/logfiles
+      ls $(Agent.TempDirectory)
 - script: |
     ls
     pwd
