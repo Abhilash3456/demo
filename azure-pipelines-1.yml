@@ -10,14 +10,17 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: AzureRmWebAppDeployment@4
+- task: AzureCLI@2
   inputs:
-    ConnectionType: 'AzureRM'
     azureSubscription: 'rm-sc-as'
-    appType: 'webAppLinux'
-    WebAppName: 'tailspin-space-game-web-dev1'
-    packageForLinux: '**/*.log'
-    ExcludeFilesFromAppDataFlag: true
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # Retrieve the storage connection string from the App Service application settings
+      connection=$(az webapp config appsettings list --name tailspin-space-game-web-dev1 --resource-group tailspin-space-game-rg --query "[?name=='AzureWebJobsStorage'].value" --output tsv)
+      
+      # Copy the file from storage account to Azure DevOps pipeline
+      az storage blob download-batch --connection-string "$connection" --destination $(Build.ArtifactStagingDirectory) --source '/home/LogFiles/sample.log'
 
   # - task: AzureCLI@2
   #   inputs:
