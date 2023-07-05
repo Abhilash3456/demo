@@ -10,11 +10,29 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
 - script: |
-    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-    sudo apt-get update
-    sudo apt-get install jq -y
-  displayName: 'Install Azure CLI and jq'
+    npm install
+    npm run build
+  displayName: 'npm install and build'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)/build'
+    artifact: 'react-app'
+    publishLocation: 'pipeline'
+
+
+
+# - script: |
+#     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+#     sudo apt-get update
+#     sudo apt-get install jq -y
+#   displayName: 'Install Azure CLI and jq'
 # - task: NodeTool@0
 #   inputs:
 #     versionSpec: '10.x'
@@ -126,27 +144,27 @@ steps:
 #       rm $AZURE_CLI_TEMP_OUTPUT
 
 
-- task: AzureCLI@2
-  displayName: 'Copy log files to storage account'
-  inputs:
-    azureSubscription: 'rm-sc-as'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      # Set variables
-      appServiceName='tailspin-space-game-web-dev1'
-      resourceGroupName='tailspin-space-game-rg'
-      storageAccountName='sampleappservice123'
-      containerName='demo'
-      sourcePath='/home/LogFiles/sample.log'  # Specify the exact log file path
-      storageAccountKey='ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ=='  # Replace with your storage account key
+# - task: AzureCLI@2
+#   displayName: 'Copy log files to storage account'
+#   inputs:
+#     azureSubscription: 'rm-sc-as'
+#     scriptType: 'bash'
+#     scriptLocation: 'inlineScript'
+#     inlineScript: |
+#       # Set variables
+#       appServiceName='tailspin-space-game-web-dev1'
+#       resourceGroupName='tailspin-space-game-rg'
+#       storageAccountName='sampleappservice123'
+#       containerName='demo'
+#       sourcePath='/home/LogFiles/sample.log'  # Specify the exact log file path
+#       storageAccountKey='ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ=='  # Replace with your storage account key
       
-      # Copy log files to storage account
-      az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath $AZURE_CLI_TEMP_OUTPUT
+#       # Copy log files to storage account
+#       az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath $AZURE_CLI_TEMP_OUTPUT
       
-      # Upload log files to storage account container
-      logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'LogFiles.*')
-      az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
+#       # Upload log files to storage account container
+#       logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'LogFiles.*')
+#       az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
       
-      # Cleanup temporary files
-      rm $AZURE_CLI_TEMP_OUTPUT
+#       # Cleanup temporary files
+#       rm $AZURE_CLI_TEMP_OUTPUT
