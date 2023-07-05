@@ -4,25 +4,28 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-- main
+  - main
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: 'rm-sc-as'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      # Retrieve the .log files from the App Service using Kudu REST API
-      echo "Retrieving .log files from App Service..."
-      az webapp log download --resource-group tailspin-space-game-rg --name tailspin-space-game-web-dev1 --log-file "*.log" --output-path "$(Agent.TempDirectory)/logfiles"
-      
-      # Copy the .log files to the storage account container
-      echo "Copying .log files to storage account container..."
-      az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'rm-sc-as'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # Create a temporary directory
+        mkdir -p "$(Agent.TempDirectory)/logfiles"
+        
+        # Retrieve the .log files from the App Service using Kudu REST API
+        echo "Retrieving .log files from App Service..."
+        az webapp log download --resource-group tailspin-space-game-rg --name tailspin-space-game-web-dev1 --log-file "*.log" --output "$(Agent.TempDirectory)/logfiles"
+        
+        # Copy the .log files to the storage account container
+        echo "Copying .log files to storage account container..."
+        az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
 
 - task: NodeTool@0
   inputs:
