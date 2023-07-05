@@ -22,7 +22,7 @@ steps:
       
       # Retrieve the .log files from the App Service using Kudu REST API
       echo "Retrieving .log files from App Service..."
-      curl -u $USERNAME:$PASSWORD https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/home/LogFiles/sample.log -o "$(Agent.TempDirectory)/logfiles/sample.log"
+      curl -u $USERNAME:$PASSWORD https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/sample.log -o "$(Agent.TempDirectory)/logfiles/sample.log"
       
       # Copy the .log files to the storage account container
       echo "Copying .log files to storage account container..."
