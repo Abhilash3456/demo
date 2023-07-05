@@ -31,7 +31,7 @@ steps:
       
       # Copy the .log files to the storage account container
       echo "Copying .log files to storage account container..."
-      az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination "demo/logfiles/$(date +"%d_%m_%Y_[%H-%M-%S]")" --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
+      az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination "demo/logfiles/$(date +"%d_%m_%Y_[%I:%M:%S_%p]")" --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
 
 
 
