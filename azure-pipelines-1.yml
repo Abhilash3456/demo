@@ -3,7 +3,6 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
-
 trigger:
   - main
 
@@ -20,13 +19,48 @@ steps:
       # Create a temporary directory
       mkdir -p "$(Agent.TempDirectory)/logfiles"
       
-      # Retrieve all .log files from the App Service using Kudu REST API
-      echo "Retrieving .log files from App Service..."
-      curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/*.log" -o "$(Agent.TempDirectory)/logfiles/*.log"
+      # Retrieve the list of .log files from the App Service using Kudu REST API
+      echo "Retrieving list of .log files from App Service..."
+      log_files=$(curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" | grep -oE '[^"]+\.log')
+      
+      # Loop through each .log file and download it
+      for log_file in $log_files; do
+        echo "Downloading $log_file..."
+        curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/$log_file" -o "$(Agent.TempDirectory)/logfiles/$log_file"
+      done
       
       # Copy the .log files to the storage account container
       echo "Copying .log files to storage account container..."
       az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination "demo/logfiles/$(date +"%Y_%m_%d_%H_%M_%S")" --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
+
+
+
+
+
+#the below is used to copy the log file and put it in storage account container by creating a folder logfiles and sub folder as current date and time
+# trigger:
+#   - main
+
+# pool:
+#   vmImage: ubuntu-latest
+
+# steps:
+# - task: AzureCLI@2
+#   inputs:
+#     azureSubscription: 'rm-sc-as'
+#     scriptType: 'bash'
+#     scriptLocation: 'inlineScript'
+#     inlineScript: |
+#       # Create a temporary directory
+#       mkdir -p "$(Agent.TempDirectory)/logfiles"
+      
+#       # Retrieve all .log files from the App Service using Kudu REST API
+#       echo "Retrieving .log files from App Service..."
+#       curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/*.log" -o "$(Agent.TempDirectory)/logfiles/*.log"
+      
+#       # Copy the .log files to the storage account container
+#       echo "Copying .log files to storage account container..."
+#       az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination "demo/logfiles/$(date +"%Y_%m_%d_%H_%M_%S")" --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
 
 
 
