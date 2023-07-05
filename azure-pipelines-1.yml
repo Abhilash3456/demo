@@ -2,7 +2,6 @@
 # Build a Node.js project that uses React.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
   - main
 
@@ -21,19 +20,13 @@ steps:
         
         # Retrieve the .log files from the App Service using Azure CLI
         echo "Retrieving .log files from App Service..."
-        log_urls=$(az webapp log download --resource-group tailspin-space-game-rg --name tailspin-space-game-web-dev1--log-file "*.log" --query "[].{URL: url}" -o json | jq -r ".[].URL")
-        echo "Log URLs: $log_urls"
-        
-        for log_url in $log_urls; do
-          file_name=$(basename "$log_url")
-          echo "Downloading: $log_url"
-          curl -u $USERNAME:$PASSWORD "$log_url" -o "$(Agent.TempDirectory)/logfiles/$file_name"
+        az webapp log tail --name tailspin-space-game-web-dev1 --resource-group tailspin-space-game-rg --query "[?contains(name, '.log')].name" -o tsv | while read -r log_file; do
+          curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/$log_file" -o "$(Agent.TempDirectory)/logfiles/$log_file"
         done
         
         # Copy the .log files to the storage account container
         echo "Copying .log files to storage account container..."
         az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo/logfiles --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
-
 
 
 
