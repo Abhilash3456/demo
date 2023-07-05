@@ -53,10 +53,10 @@ steps:
       storageAccountKey='ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ=='
       
       # Copy log files to storage account
-      az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath --output $AZURE_CLI_TEMP_OUTPUT
+      az webapp log download --name $appServiceName --resource-group $resourceGroupName --log-file $sourcePath --output /home/vsts/work/1/s/tempe
       
       # Upload log files to storage account container
-      logsDir=$(cat $AZURE_CLI_TEMP_OUTPUT | jq -r '.[].path' | grep -oP 'logs.*')
+      logsDir=$(cat /home/vsts/work/1/s/tempe | jq -r '.[].path' | grep -oP 'logs.*')
       az storage blob upload-batch --account-name $storageAccountName --account-key $storageAccountKey --destination-container $containerName --source "$logsDir" --pattern "*.log"
       
       # Cleanup temporary files
