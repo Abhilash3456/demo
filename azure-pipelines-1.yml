@@ -19,20 +19,55 @@ steps:
         # Create a temporary directory
         mkdir -p "$(Agent.TempDirectory)/logfiles"
         
-        # Retrieve the .log files from the App Service using Kudu REST API
+        # Retrieve the .log files from the App Service using Azure CLI
         echo "Retrieving .log files from App Service..."
-        log_urls=$(curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/home/LogFiles/*.log" -s)
+        log_urls=$(az webapp log download --resource-group tailspin-space-game-rg --name tailspin-space-game-web-dev1--log-file "*.log" --query "[].{URL: url}" -o json | jq -r ".[].URL")
         echo "Log URLs: $log_urls"
         
-        while IFS= read -r log_url; do
+        for log_url in $log_urls; do
           file_name=$(basename "$log_url")
           echo "Downloading: $log_url"
           curl -u $USERNAME:$PASSWORD "$log_url" -o "$(Agent.TempDirectory)/logfiles/$file_name"
-        done <<< "$log_urls"
+        done
         
         # Copy the .log files to the storage account container
         echo "Copying .log files to storage account container..."
         az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo/logfiles --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
+
+
+
+
+
+# trigger:
+#   - main
+
+# pool:
+#   vmImage: ubuntu-latest
+
+# steps:
+#   - task: AzureCLI@2
+#     inputs:
+#       azureSubscription: 'rm-sc-as'
+#       scriptType: 'bash'
+#       scriptLocation: 'inlineScript'
+#       inlineScript: |
+#         # Create a temporary directory
+#         mkdir -p "$(Agent.TempDirectory)/logfiles"
+        
+#         # Retrieve the .log files from the App Service using Kudu REST API
+#         echo "Retrieving .log files from App Service..."
+#         log_urls=$(curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/home/LogFiles/*.log" -s)
+#         echo "Log URLs: $log_urls"
+        
+#         while IFS= read -r log_url; do
+#           file_name=$(basename "$log_url")
+#           echo "Downloading: $log_url"
+#           curl -u $USERNAME:$PASSWORD "$log_url" -o "$(Agent.TempDirectory)/logfiles/$file_name"
+#         done <<< "$log_urls"
+        
+#         # Copy the .log files to the storage account container
+#         echo "Copying .log files to storage account container..."
+#         az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo/logfiles --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
 
 
 
