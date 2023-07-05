@@ -10,7 +10,14 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-
+- task: AzureFileCopy@5
+  inputs:
+    SourcePath: '/home/LogFiles/sample.log'
+    azureSubscription: 'rm-sc-as'
+    Destination: 'AzureBlob'
+    storage: 'sampleappservice123'
+    ContainerName: 'demo'
+    BlobPrefix: 'sample.log'
 - script: |
     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
     sudo apt-get update
