@@ -11,50 +11,30 @@ pool:
 
 steps:
 
-- task: AzureCLI@2
-  displayName: 'Copy file to Azure Storage Account'
-  inputs:
-    azureSubscription: 'rm-sc-as'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      # Copy the file to Azure Storage Account
-      az storage blob upload --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ== --container-name demo --name sample.log --type block --source /home/LogFiles/sample.log
+trigger:
+  - main
 
+pool:
+  vmImage: ubuntu-latest
 
-- task: AzureFileCopy@5
-  inputs:
-    SourcePath: '/home/LogFiles/sample.log'
-    azureSubscription: 'rm-sc-as'
-    Destination: 'AzureBlob'
-    storage: 'sampleappservice123'
-    ContainerName: 'demo'
-    BlobPrefix: 'sample.log'
-- script: |
-    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-    sudo apt-get update
-    sudo apt-get install jq -y
-    mkdir tempe
-    ls
-    pwd
-  displayName: 'Install Azure CLI and jq'
+steps:
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'rm-sc-as'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # Create a temporary directory
+        mkdir -p "$(Agent.TempDirectory)/logfiles"
+        
+        # Retrieve the .log files from the App Service using Kudu REST API
+        echo "Retrieving .log files from App Service..."
+        curl -u $USERNAME:$PASSWORD https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/home/LogFiles/sample.log -o "$(Agent.TempDirectory)/logfiles/sample.log"
+        
+        # Copy the .log files to the storage account container
+        echo "Copying .log files to storage account container..."
+        az storage blob upload-batch --source "$(Agent.TempDirectory)/logfiles" --destination demo --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ==
 
-- task: AzureCLI@2
-  displayName: 'Copy file to Azure Storage Account'
-  inputs:
-    azureSubscription: 'rm-sc-as'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      # Get the file from App Service using Kudu REST API
-      fileUrl=$(az webapp kudu file list -g tailspin-space-game-rg -n tailspin-space-game-web-dev1 --path "/home/LogFiles/sample.log" --json | jq -r '.[].href')
-      curl -o sample.log $fileUrl
-      
-      # Copy the file to Azure Storage Account
-      az storage blob upload --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ== --container-name demo --name sampleans.log --type block --source sample.log
-      
-      # Clean up the downloaded file
-      rm sample.log
 
 
   # - task: AzureCLI@2
