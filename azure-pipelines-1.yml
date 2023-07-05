@@ -21,11 +21,11 @@ steps:
       
       # Retrieve the .log files from the App Service using Kudu REST API
       echo "Retrieving .log files from App Service..."
-      curl -u $USERNAME:$PASSWORD https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles -o "$TEMP_DIR/logfiles"
+      curl -u $USERNAME:$PASSWORD https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/2023_07_05_lw1sdlwk000EPX_docker.log -o "$TEMP_DIR/logfiles"
       
       # Copy the .log files to the storage account container
       echo "Copying .log files to storage account container..."
-      find "$TEMP_DIR/logfiles" -name "*.log" -type f -exec az storage blob upload --type block --source {} --destination demo --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ== \;
+      find "$TEMP_DIR/logfiles" -name "2023_07_05_lw1sdlwk000EPX_docker.log" -type f -exec az storage blob upload --type block --source {} --destination demo --account-name sampleappservice123 --account-key ByK4xqbwE82MVZtHeymzdMwMoxhiBy1QOzCO/IWS2BNNdJdM+3u8eXEs56n6/Z7nrymhXMBuzEz6+AStJtt7LQ== \;
 
 
 
