@@ -33,6 +33,8 @@ steps:
         curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/$log_file" -o "$file_path"
       done
       echo "Copying .log files to the Ubuntu VM..."
+      chmod 600 /home/vsts/work/_temp/private_key.txt
+      ssh -o StrictHostKeyChecking=no -i "$vm_ssh_key_path" "$vm_username@$vm_hostname" exit
       scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
       rm -rf "$(Agent.TempDirectory)/logs"
       ls "$(Agent.TempDirectory)"
