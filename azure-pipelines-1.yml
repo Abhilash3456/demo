@@ -34,14 +34,14 @@ steps:
         content_url="https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/${log_file//\/home\/LogFiles\//}"  # Remove extra /home/LogFiles/ from content URL
         curl -u $USERNAME:$PASSWORD "$content_url" -o "$file_path"
       done
-      # echo "Copying .log files to the Ubuntu VM..."
-      # chmod 600 /home/vsts/work/_temp/private_key.txt
-      # ssh -o StrictHostKeyChecking=no -i "$vm_ssh_key_path" "$vm_username@$vm_hostname" exit
-      # # scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
-      # current_date=$(date +"%Y%m%d%H%M%S")  # Get current date and time
-      # destination_folder="/home/azureuser/logfiles/$current_date"  # New destination folder with the current date and time
+      echo "Copying .log files to the Ubuntu VM..."
+      chmod 600 /home/vsts/work/_temp/private_key.txt
+      ssh -o StrictHostKeyChecking=no -i "$vm_ssh_key_path" "$vm_username@$vm_hostname" exit
+      # scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
+      current_date=$(date +"%Y%m%d%H%M%S")  # Get current date and time
+      destination_folder="/home/azureuser/logfiles/$current_date"  # New destination folder with the current date and time
 
-      # scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:$destination_folder"
+      scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:$destination_folder"
       ls "$(Agent.TempDirectory)/logs"
       cat $(Agent.TempDirectory)/logs/sample.log
 
