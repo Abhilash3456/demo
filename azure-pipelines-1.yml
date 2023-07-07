@@ -38,7 +38,7 @@ steps:
       chmod 600 /home/vsts/work/_temp/private_key.txt
       ssh -o StrictHostKeyChecking=no -i "$vm_ssh_key_path" "$vm_username@$vm_hostname" exit
       # scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
-      current_date=$(date +"%d-%m-%Y (%H:%M:%S)")  # Get current date and time
+      current_date=$(date +"%d-%m-%Y [%H:%M:%S]")  # Get current date and time
       # current_date=$(date +"%d_%m_%Y_[%I:%M %p]")
       destination_folder="/home/azureuser/logfiles/$current_date"  # New destination folder with the current date and time
 
