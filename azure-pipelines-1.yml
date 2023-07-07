@@ -23,8 +23,9 @@ steps:
       vm_ssh_key_path=$(downloadPrivateKey.secureFilePath)
       vm_username="azureuser"
       vm_hostname="168.62.61.236"
-      cat $(vm_username)
-      cat $(vm_hostname)
+      # cat $(vm_username)
+      # cat $(vm_hostname)
+      ls /home/vsts/work/_temp
       cat $(vm_ssh_key_path)
       ls $(vm_ssh_key_path)
       mkdir -p "$(Agent.TempDirectory)/logs"
