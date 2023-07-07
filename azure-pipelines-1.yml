@@ -26,7 +26,7 @@ steps:
       cat /home/vsts/work/_temp/private_key.txt
       mkdir -p "$(Agent.TempDirectory)/logs"
       echo "Retrieving list of .log files from App Service..."
-      log_files=$(curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles" | grep -oE '[^"]+\.log')
+      log_files=$(curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" | grep -oE '[^"]+\.log')
       for log_file in $log_files; do
         echo "Downloading $log_file..."
         curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/$log_file" -o "$(Agent.TempDirectory)/logs/$log_file"
