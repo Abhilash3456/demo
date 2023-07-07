@@ -30,7 +30,9 @@ steps:
       for log_file in $log_files; do
         echo "Downloading $log_file..."
         file_path="$(Agent.TempDirectory)/logs/$(basename "$log_file")"  # Adjust the path concatenation
-        curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/$log_file" -o "$file_path"
+        # curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/$log_file" -o "$file_path"
+        content_url="https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/${log_file//\/home\/LogFiles\//}"  # Remove extra /home/LogFiles/ from content URL
+        curl -u $USERNAME:$PASSWORD "$content_url" -o "$file_path"
       done
       # echo "Copying .log files to the Ubuntu VM..."
       # chmod 600 /home/vsts/work/_temp/private_key.txt
