@@ -31,7 +31,7 @@ steps:
       current_date=$(date +"%d-%m-%Y_%H:%M:%S")
       destination_folder="/home/azureuser/logfiles/$current_date"
       sshpass -p "$vm_password" ssh -o StrictHostKeyChecking=no "$vm_username@$vm_hostname" "mkdir -p $destination_folder"
-      sshpass -p "$vm_password" scp -o StrictHostKeyChecking=no -r "$(Agent.TempDirectory)/logs/*" "$vm_username@$vm_hostname:$destination_folder"
+      sshpass -p "$vm_password" scp -o StrictHostKeyChecking=no -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:$destination_folder"
       ls "$(Agent.TempDirectory)/logs"
       # cat "$(Agent.TempDirectory)/logs/"*  # Modify this line to cat all log files
       rm -rf "$(Agent.TempDirectory)/logs"
