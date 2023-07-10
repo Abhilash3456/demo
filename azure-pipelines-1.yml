@@ -31,7 +31,7 @@ steps:
         echo "Downloading $log_file..."
         file_path="$(Agent.TempDirectory)/logs/$(basename "$log_file")"  # Adjust the path concatenation
         content_url="https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/${log_file//\/home\/LogFiles\//}"  # Remove extra /home/LogFiles/ from content URL
-        curl -u $vm_username:$vm_password "$content_url" -o "$file_path"
+        curl -u $USERNAME:$PASSWORD "$content_url" -o "$file_path"
       done
       echo "Copying .log files to the Ubuntu VM..."
       sshpass -p "$vm_password" scp -o StrictHostKeyChecking=no -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
