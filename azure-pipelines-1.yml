@@ -36,9 +36,10 @@ steps:
       echo "Copying .log files to the Ubuntu VM..."
       sshpass -p "$vm_password" scp -o StrictHostKeyChecking=no -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
       ls "$(Agent.TempDirectory)/logs"
-      cat "$(Agent.TempDirectory)/logs/sample.log"
+      cat "$(Agent.TempDirectory)/logs/"*  # Modify this line to cat all log files
       rm -rf "$(Agent.TempDirectory)/logs"
       ls "$(Agent.TempDirectory)"
+
 
 
 
