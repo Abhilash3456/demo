@@ -21,8 +21,8 @@ steps:
       secureFile: 'private_key.txt'
 
   - script: |
-      vm_username=$(echo $(username) | base64 --decode)
-      vm_password=$(echo $(password) | base64 --decode)
+      vm_username=$(username)
+      vm_password=$(password)
       vm_hostname="168.62.61.236"
       mkdir -p "$(Agent.TempDirectory)/logs"
       echo "Retrieving list of .log files from App Service..."
