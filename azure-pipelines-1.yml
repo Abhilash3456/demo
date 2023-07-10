@@ -44,6 +44,7 @@ steps:
 
 
 
+
 # the script is working for copying files from app service to azure vm that uses certificate key for connecting 
 # trigger:
 #   - main
