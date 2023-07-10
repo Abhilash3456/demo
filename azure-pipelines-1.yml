@@ -3,49 +3,6 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
-trigger:
-  - main
-
-pool:
-  vmImage: ubuntu-latest
-
-variables:
-  username: 'azureuser'
-  password: 'Testing@123456'
-
-steps:
-  - task: DownloadSecureFile@1
-    name: downloadPrivateKey
-    displayName: 'Download Private Key'
-    inputs:
-      secureFile: 'private_key.txt'
-
-  - script: |
-      vm_username=$(username)
-      vm_password=$(password)
-      vm_hostname="168.62.61.236"
-      mkdir -p "$(Agent.TempDirectory)/logs"
-      echo "Retrieving list of .log files from App Service..."
-      log_files=$(curl -u $vm_username:$vm_password "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" | grep -oE '[^"]+\.log')
-      for log_file in $log_files; do
-        echo "Downloading $log_file..."
-        file_path="$(Agent.TempDirectory)/logs/$(basename "$log_file")"  # Adjust the path concatenation
-        content_url="https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/${log_file//\/home\/LogFiles\//}"  # Remove extra /home/LogFiles/ from content URL
-        curl -u $vm_username:$vm_password "$content_url" -o "$file_path"
-      done
-      echo "Copying .log files to the Ubuntu VM..."
-      sshpass -p "$vm_password" scp -o StrictHostKeyChecking=no -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
-      ls "$(Agent.TempDirectory)/logs"
-      cat "$(Agent.TempDirectory)/logs/sample.log"
-      rm -rf "$(Agent.TempDirectory)/logs"
-      ls "$(Agent.TempDirectory)"
-
-
-
-
-
-
-# the script is working for copying files from app service to azure vm that uses certificate key for connecting 
 # trigger:
 #   - main
 
@@ -53,7 +10,8 @@ steps:
 #   vmImage: ubuntu-latest
 
 # variables:
-#   privateKeyPath: $(Agent.TempDirectory)/private_key.txt
+#   username: 'azureuser'
+#   password: 'Testing@123456'
 
 # steps:
 #   - task: DownloadSecureFile@1
@@ -63,34 +21,76 @@ steps:
 #       secureFile: 'private_key.txt'
 
 #   - script: |
-#       vm_username="azureuser"
+#       vm_username=$(username)
+#       vm_password=$(password)
 #       vm_hostname="168.62.61.236"
-#       vm_ssh_key_path=/home/vsts/work/_temp/private_key.txt
-#       cat /home/vsts/work/_temp/private_key.txt
 #       mkdir -p "$(Agent.TempDirectory)/logs"
 #       echo "Retrieving list of .log files from App Service..."
-#       log_files=$(curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" | grep -oE '[^"]+\.log')
+#       log_files=$(curl -u $vm_username:$vm_password "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" | grep -oE '[^"]+\.log')
 #       for log_file in $log_files; do
 #         echo "Downloading $log_file..."
 #         file_path="$(Agent.TempDirectory)/logs/$(basename "$log_file")"  # Adjust the path concatenation
-#         # curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/$log_file" -o "$file_path"
 #         content_url="https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/${log_file//\/home\/LogFiles\//}"  # Remove extra /home/LogFiles/ from content URL
-#         curl -u $USERNAME:$PASSWORD "$content_url" -o "$file_path"
+#         curl -u $vm_username:$vm_password "$content_url" -o "$file_path"
 #       done
 #       echo "Copying .log files to the Ubuntu VM..."
-#       chmod 600 /home/vsts/work/_temp/private_key.txt
-#       ssh -o StrictHostKeyChecking=no -i "$vm_ssh_key_path" "$vm_username@$vm_hostname" exit
-#       # scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
-#       current_date=$(date +"%d-%m-%Y_%H:%M:%S")  # Get current date and time
-#       # current_date=$(date +"%d_%m_%Y_[%I:%M %p]")
-#       destination_folder="/home/azureuser/logfiles/$current_date"  # New destination folder with the current date and time
-
-#       scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:$destination_folder"
+#       sshpass -p "$vm_password" scp -o StrictHostKeyChecking=no -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
 #       ls "$(Agent.TempDirectory)/logs"
-#       cat $(Agent.TempDirectory)/logs/sample.log
-
+#       cat "$(Agent.TempDirectory)/logs/sample.log"
 #       rm -rf "$(Agent.TempDirectory)/logs"
 #       ls "$(Agent.TempDirectory)"
+
+
+
+
+
+
+# the script is working for copying files from app service to azure vm that uses certificate key for connecting 
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  privateKeyPath: $(Agent.TempDirectory)/private_key.txt
+
+steps:
+  - task: DownloadSecureFile@1
+    name: downloadPrivateKey
+    displayName: 'Download Private Key'
+    inputs:
+      secureFile: 'private_key.txt'
+
+  - script: |
+      vm_username="azureuser"
+      vm_hostname="168.62.61.236"
+      vm_ssh_key_path=/home/vsts/work/_temp/private_key.txt
+      cat /home/vsts/work/_temp/private_key.txt
+      mkdir -p "$(Agent.TempDirectory)/logs"
+      echo "Retrieving list of .log files from App Service..."
+      log_files=$(curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" | grep -oE '[^"]+\.log')
+      for log_file in $log_files; do
+        echo "Downloading $log_file..."
+        file_path="$(Agent.TempDirectory)/logs/$(basename "$log_file")"  # Adjust the path concatenation
+        # curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/$log_file" -o "$file_path"
+        content_url="https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/${log_file//\/home\/LogFiles\//}"  # Remove extra /home/LogFiles/ from content URL
+        curl -u $USERNAME:$PASSWORD "$content_url" -o "$file_path"
+      done
+      echo "Copying .log files to the Ubuntu VM..."
+      chmod 600 /home/vsts/work/_temp/private_key.txt
+      ssh -o StrictHostKeyChecking=no -i "$vm_ssh_key_path" "$vm_username@$vm_hostname" exit
+      # scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:/home/azureuser/logfiles"
+      current_date=$(date +"%d-%m-%Y_%H:%M:%S")  # Get current date and time
+      # current_date=$(date +"%d_%m_%Y_[%I:%M %p]")
+      destination_folder="/home/azureuser/logfiles/$current_date"  # New destination folder with the current date and time
+
+      scp -i "$vm_ssh_key_path" -r "$(Agent.TempDirectory)/logs" "$vm_username@$vm_hostname:$destination_folder"
+      ls "$(Agent.TempDirectory)/logs"
+      cat $(Agent.TempDirectory)/logs/sample.log
+
+      rm -rf "$(Agent.TempDirectory)/logs"
+      ls "$(Agent.TempDirectory)"
 
 
 
