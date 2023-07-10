@@ -14,12 +14,6 @@ variables:
   vmpassword: 'Testing@123456'
 
 steps:
-  - task: DownloadSecureFile@1
-    name: downloadPrivateKey
-    displayName: 'Download Private Key'
-    inputs:
-      secureFile: 'private_key.txt'
-
   - script: |
       vm_username=$(vmusername)
       vm_password=$(vmpassword)
