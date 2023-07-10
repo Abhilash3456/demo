@@ -10,8 +10,8 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  username: 'azureuser'
-  password: 'Testing@123456'
+  vmusername: 'azureuser'
+  vmpassword: 'Testing@123456'
 
 steps:
   - task: DownloadSecureFile@1
@@ -21,12 +21,12 @@ steps:
       secureFile: 'private_key.txt'
 
   - script: |
-      vm_username=$(username)
-      vm_password=$(password)
+      vm_username=$(vmusername)
+      vm_password=$(vmpassword)
       vm_hostname="172.190.207.163"
       mkdir -p "$(Agent.TempDirectory)/logs"
       echo "Retrieving list of .log files from App Service..."
-      log_files=$(curl -u $vm_username:$vm_password "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" | grep -oE '[^"]+\.log')
+      log_files=$(curl -u $USERNAME:$PASSWORD "https://tailspin-space-game-web-dev1.scm.azurewebsites.net/api/vfs/LogFiles/" | grep -oE '[^"]+\.log')
       for log_file in $log_files; do
         echo "Downloading $log_file..."
         file_path="$(Agent.TempDirectory)/logs/$(basename "$log_file")"  # Adjust the path concatenation
