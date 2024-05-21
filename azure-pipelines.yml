@@ -16,9 +16,15 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    npm install
+    npm install --legacy-peer-deps
     npm run build
   displayName: 'npm install and build'
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+    artifactName: 'drop'
 
 - task: PublishPipelineArtifact@1
   inputs:
