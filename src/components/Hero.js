@@ -3,7 +3,7 @@ import React from 'react';
 const Hero = () => {
     return (
         <div className="jumbotron text-center">
-            <h1>Welcome to hogwarts in அசத்தல்</h1>
+            <h1>Welcome to demo hogwarts in அசத்தல்</h1>
             <p>We griffendor specialize in blablabla abracadabra</p>
             <form className="form-inline">
                 <div className="input-group">
